@@ -2,8 +2,8 @@ from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 
 class MNIST():
-        '''
-        This is my mnist data generation class.
+    '''
+    This is my mnist data generation class.
         Attributes:
             x* - Variables storing the train/val/test image arrays
             y* - Variables sotring the train/val/test labels
@@ -24,9 +24,9 @@ class MNIST():
                 by aug_val.
             next - Returns next n datapoints from the training set.
                 Once it reaches the end of the data, shuffles the indices and starts over.
-            
-        '''
-    def __init__(self, aug, aug_val):
+    '''
+
+    def __init__(self, aug=None, aug_val=None):
 
         #Data storing variables
         self.x_train = None
@@ -63,7 +63,7 @@ class MNIST():
         
         self.max_idx = self.x_train.shape[0]
         self.curr_idx = 0
-        self.idx_list = np.array(range(self.x_train.shape))
+        self.idx_list = np.array(range(self.max_idx))
         return
     
     def _aug_data(self):
@@ -78,17 +78,18 @@ class MNIST():
         train_aug = np.random.normal(0, self.aug_val, self.x_train.shape) * 1 / 255.
         val_aug = np.random.normal(0, self.aug_val, self.x_val.shape) * 1 / 255.
                 
-        self.x_train = self.x_train + train_aug
-        self.x_val = self.x_val + val_aug
-        np.clip(self.x_train, 0, 1)
-        np.clip(self.x_val, 0, 1)
+        noisy_train = self.x_train + train_aug
+        noisy_val = self.x_val + val_aug
+        
+        self.x_train = np.clip(noisy_train, 0, 1)
+        self.x_val = np.clip(noisy_val, 0, 1)
         return
 
     def _mislabel(self):
         n_train = self.y_train.shape[0]
         n_val = self.y_val.shape[0]
-        train_idx = np.random.choice(n_train, n_train * self.aug_val, replace=False)
-        val_idx = np.random.choice(n_val, n_val * self.aug_val, replace=False)
+        train_idx = np.random.choice(n_train, int(n_train * self.aug_val), replace=False)
+        val_idx = np.random.choice(n_val, int(n_val * self.aug_val), replace=False)
 
         train_shuffle = self.y_train[train_idx]
         np.random.shuffle(train_shuffle)
@@ -107,3 +108,8 @@ class MNIST():
         else:
             idx = self.idx_list[self.curr_idx:self.curr_idx + n]
             return self.x_train[idx], self.y_train[idx]
+
+if __name__ == '__main__':
+    norm = MNIST()
+    noisy = MNIST('aug_noise', 8)
+    miss = MNIST('aug_miss', 0.5)
