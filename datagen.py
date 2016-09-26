@@ -2,7 +2,6 @@ from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 
 class MNIST():
-
         '''
         This is my mnist data generation class.
         Attributes:
@@ -27,8 +26,8 @@ class MNIST():
                 Once it reaches the end of the data, shuffles the indices and starts over.
             
         '''
-    
     def __init__(self, aug, aug_val):
+
         #Data storing variables
         self.x_train = None
         self.x_val = None
@@ -65,7 +64,7 @@ class MNIST():
         self.max_idx = self.x_train.shape[0]
         self.curr_idx = 0
         self.idx_list = np.array(range(self.x_train.shape))
-
+        return
     
     def _aug_data(self):
         if self.aug == 'aug_noise':
@@ -100,11 +99,11 @@ class MNIST():
         self.y_val[val_idx] = val_shuffle
         return
 
-    def next(n):
+    def next(self,n):
         if self.curr_idx + n > self.max_idx:
             self.curr_idx = 0
             np.random.shuffle(self.idx_list)
             return False
         else:
-                
-        
+            idx = self.idx_list[self.curr_idx:self.curr_idx + n]
+            return self.x_train[idx], self.y_train[idx]
