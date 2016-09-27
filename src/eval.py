@@ -3,7 +3,7 @@ from datagen import MNIST
 import sys
 import numpy as np
 
-tf.set_random_seed(1234)
+tf.set_random_seed(1)
 
 def main(model, other):
     data = _data(other)
