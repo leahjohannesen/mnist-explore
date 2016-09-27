@@ -3,6 +3,8 @@ from datagen import MNIST
 import sys
 import numpy as np
 
+tf.set_random_seed(1234)
+
 def main(model, other):
     data = _data(other)
     if 'grid' in other:
@@ -22,7 +24,7 @@ def _data(other):
         data = MNIST()
     return data
 
-def _grid(model, other):
+def _grid(data, model, other):
     #Performs grid search, could be more modular
     n = 5
     lr_range = np.power(10, np.random.uniform(-6, 1, n))
@@ -30,21 +32,23 @@ def _grid(model, other):
     for i in lr_range:
         for j in drop_range:
             print 'Crossval with lr={}, dropout={}'.format(i,j)
-            train(model, other, lr=i, drop=j)
+            _train(data, model, other, lr=i, drop=j)
 
-def _train(data, model, other, lr=1e-4, drop=0.5):
+def _train(data, model, other=None, lr=1e-4, drop=0.5):
     #Imports the model and creates all the stuff required for running
     x = tf.placeholder(tf.float32, shape=[None, 784])
     y = tf.placeholder(tf.float32, shape=[None, 10])
-
-    mod = __import__(model)
+    keep = tf.placeholder(tf.float32)
+    
+    sys.path.append('/home/ubuntu/mnist-explore/src/models/')
+    mod = __import__('basic')
 
     y_pred = mod.pred(x)
+    acc = mod.acc(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
     train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
-    acc = mod.acc(y, y_pred)
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
@@ -64,13 +68,14 @@ def _train(data, model, other, lr=1e-4, drop=0.5):
                 batch = data.next_batch(batch_size)
                 if not batch:
                     val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
-                print "End of Epoch"
-                print "Validation Accuracy: {}\n".format(val_acc)
-                break
-            if n%100 == 0:
-                print "Running batch {}.".format(n)
-            n += 1
-            results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1], keep: drop})
+                    print "End of Epoch"
+                    print "Validation Accuracy: {}\n".format(val_acc)
+                    break
+                if n%100 == 0:
+                    print "Running batch {}.".format(n)
+                n += 1
+                results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1], keep: drop})
+    return
 
 if __name__ == '__main__':
     model = sys.argv[1]
