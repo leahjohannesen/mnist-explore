@@ -100,14 +100,14 @@ class MNIST():
         self.y_val[val_idx] = val_shuffle
         return
 
-    def next(self,n):
+    def next_batch(self,n):
         if self.curr_idx + n > self.max_idx:
             self.curr_idx = 0
             np.random.shuffle(self.idx_list)
             return False
         else:
             idx = self.idx_list[self.curr_idx:self.curr_idx + n]
-            return self.x_train[idx], self.y_train[idx]
+            return (self.x_train[idx], self.y_train[idx])
 
 if __name__ == '__main__':
     norm = MNIST()
