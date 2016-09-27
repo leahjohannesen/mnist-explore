@@ -64,15 +64,19 @@ class MNIST():
         self.max_idx = self.x_train.shape[0]
         self.curr_idx = 0
         self.idx_list = np.array(range(self.max_idx))
+        print "Base data generated."
         return
     
     def _aug_data(self):
         if self.aug == 'aug_noise':
+            print "Adding noise to data."
             self._add_noise()
         elif self.aug == 'aug_miss':
+            print "Adding misclassification to data."
             self._mislabel()
         else:
-            pass
+            print "No augmentations."
+        return
     
     def _add_noise(self):
         train_aug = np.random.normal(0, self.aug_val, self.x_train.shape) * 1 / 255.

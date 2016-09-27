@@ -1,44 +1,78 @@
 import tensorflow as tf
 from datagen import MNIST
-import models.basic as mod
+import sys
+import numpy as np
 
-data = MNIST()
+def main(model, other):
+    data = _data(other)
+    if 'grid' in other:
+        _grid(data, model, other)
+    else:
+        _train(data, model, other) 
 
-x = tf.placeholder(tf.float32, shape=[None, 784])
-y = tf.placeholder(tf.float32, shape=[None, 10])
+def _data(other):
+    #Controls augmentation and returns the appropraite dataset
+    if 'aug_noise' in other:
+        kw_idx = other.index('aug_noise')
+        data = MNIST(other[kw_idx], other[kw_idx+1])
+    elif 'aug_miss' in other:
+        kw_idx = other.index('aug_miss')
+        data = MNIST(other[kw_idx], other[kw_idx+1])
+    else:
+        data = MNIST()
+    return data
 
-y_pred = mod.pred(x)
+def _grid(model, other):
+    #Performs grid search, could be more modular
+    n = 5
+    lr_range = np.power(10, np.random.uniform(-6, 1, n))
+    drop_range = np.random.random(n)
+    for i in lr_range:
+        for j in drop_range:
+            print 'Crossval with lr={}, dropout={}'.format(i,j)
+            train(model, other, lr=i, drop=j)
 
-loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
-train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+def _train(data, model, other, lr=1e-4, drop=0.5):
+    #Imports the model and creates all the stuff required for running
+    x = tf.placeholder(tf.float32, shape=[None, 784])
+    y = tf.placeholder(tf.float32, shape=[None, 10])
 
-acc = mod.acc(y, y_pred)
+    mod = __import__(model)
 
-with tf.Session() as sess:
-    sess.run(tf.initialize_all_variables())
-    
-    epochs = 20
-    batch_size = 64
+    y_pred = mod.pred(x)
 
-    x_val, y_val = data.x_val, data.y_val
-    val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
-    print "Starting Validation Accuray: {}".format(val_acc)
+    loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
+    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
-    for epoch in range(epochs):
-        print "-----Starting Epoch {}-----".format(epoch)
-        n = 0
+    acc = mod.acc(y, y_pred)
 
-        while True:
-            batch = data.next_batch(batch_size)
-            if not batch:
-                val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
+    with tf.Session() as sess:
+        sess.run(tf.initialize_all_variables())
+        
+        epochs = 1
+        batch_size = 64
+
+        x_val, y_val = data.x_val, data.y_val
+        val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
+        print "Starting Validation Accuray: {}".format(val_acc)
+
+        for epoch in range(epochs):
+            print "-----Starting Epoch {}-----".format(epoch)
+            n = 0
+
+            while True:
+                batch = data.next_batch(batch_size)
+                if not batch:
+                    val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
                 print "End of Epoch"
                 print "Validation Accuracy: {}\n".format(val_acc)
                 break
             if n%100 == 0:
                 print "Running batch {}.".format(n)
             n += 1
-            results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1]})
+            results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1], keep: drop})
 
-                
-
+if __name__ == '__main__':
+    model = sys.argv[1]
+    other = sys.argv[2:]
+    main(model,other)
