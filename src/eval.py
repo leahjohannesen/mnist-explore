@@ -17,8 +17,8 @@ acc = mod.acc(y, y_pred)
 with tf.Session() as sess:
     sess.run(tf.initialize_all_variables())
     
-    epochs = 3
-    batch_size = 50
+    epochs = 20
+    batch_size = 64
 
     x_val, y_val = data.x_val, data.y_val
     val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
@@ -32,10 +32,10 @@ with tf.Session() as sess:
             batch = data.next_batch(batch_size)
             if not batch:
                 val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
-                print "End of Epoch\n"
-                print "Validation Accuracy: {}".format(val_acc)
+                print "End of Epoch"
+                print "Validation Accuracy: {}\n".format(val_acc)
                 break
-            if n%500 == 0:
+            if n%100 == 0:
                 print "Running batch {}.".format(n)
             n += 1
             results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1]})
