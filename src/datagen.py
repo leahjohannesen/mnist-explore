@@ -106,7 +106,10 @@ class MNIST():
             np.random.shuffle(self.idx_list)
             return False
         else:
-            idx = self.idx_list[self.curr_idx:self.curr_idx + n]
+            start = self.curr_idx
+            end = self.curr_idx + n
+            idx = self.idx_list[start:end]
+            self.curr_idx = end
             return (self.x_train[idx], self.y_train[idx])
 
 if __name__ == '__main__':
