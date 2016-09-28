@@ -52,7 +52,7 @@ class MNIST():
         self._aug_data()
 
     def _base_data(self):
-        mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+        mnist = input_data.read_data_sets('MNIST_data/', one_hot=True)
 
         #set x/y for non augmented data
         self.x_train = mnist.train.images
@@ -66,18 +66,22 @@ class MNIST():
         self.max_idx = self.x_train.shape[0]
         self.curr_idx = 0
         self.idx_list = np.array(range(self.max_idx))
-        print "Base data generated."
+        print '\n' + '- '*10
+        print 'Base data generated.'
         return
     
     def _aug_data(self):
         if self.aug == 'aug_noise':
-            print "Adding noise to data."
+            print 'Adding noise to data.'
+            print '- '*10 + '\n'
             self._add_noise()
         elif self.aug == 'aug_miss':
-            print "Adding misclassification to data."
+            print 'Adding misclassification to data.'
+            print '- '*10 + '\n'
             self._mislabel()
         else:
-            print "No augmentations."
+            print 'No augmentations.'
+            print '- '*10 + '\n'
         return
     
     def _add_noise(self):

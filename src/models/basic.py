@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 def weight_variable(shape):
-  initial = tf.truncated_normal(shape, stddev=0.1)
+  initial = tf.truncated_normal(shape, stddev=0.1, seed=1)
   return tf.Variable(initial)
 
 def bias_variable(shape):
@@ -40,7 +40,7 @@ def pred(x, drop):
     flatten = tf.reshape(pool2, [-1, 7*7*64])
     dense1 = tf.matmul(flatten, w_3)
     relu3 = tf.nn.relu(dense1 + b_3)
-    drop1 = tf.nn.dropout(relu3, drop)
+    drop1 = tf.nn.dropout(relu3, drop, seed=1)
 
     #Connection to output layer
     w_4 = weight_variable([1024, 10])

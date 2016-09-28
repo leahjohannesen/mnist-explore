@@ -6,7 +6,10 @@ import os
 import utils
 
 def main(model, other):
-    model_dir = utils.make_dir()
+    if 'log' in other:
+        model_dir = utils.make_dir()
+    else:
+        model_dir = None
     if 'grid' in other:
         _grid(model_dir, model, other)
     else:
@@ -32,9 +35,9 @@ def _grid(model_dir, model, other):
     for i in lr_range:
         for j in drop_range:
             print 'Crossval with lr={}, dropout={}'.format(i,j)
-            _train(model, other, lr=i, drop=j)
+            _train(model_dir, model, other, lr=i, drop=j)
 
-def _train(model_dir, model, other=None, lr=1e-4, drop=0.5):
+def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     #Imports the model and creates all the stuff required for running
     tf.reset_default_graph()
     tf.set_random_seed(1)
@@ -63,7 +66,9 @@ def _train(model_dir, model, other=None, lr=1e-4, drop=0.5):
         loss_list = []
         x_val, y_val = data.x_val, data.y_val
         val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
+        print '\n' + '- '*10
         print "Starting Validation Accuray: {}".format(val_acc)
+        print '- '*10 + '\n'
 
         for epoch in range(epochs):
             print "-----Starting Epoch {}-----".format(epoch)
@@ -83,7 +88,8 @@ def _train(model_dir, model, other=None, lr=1e-4, drop=0.5):
                                                                   y: batch[1], keep: drop})
                 loss_list.append(loss_val)
 
-    utils.save_results(model_dir, loss_list, model, lr, batch_size, drop)
+    if model_dir:
+        utils.save_results(model_dir, loss_list, model, lr, batch_size, drop)
     return
 
 if __name__ == '__main__':
