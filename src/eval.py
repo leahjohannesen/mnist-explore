@@ -2,8 +2,10 @@ import tensorflow as tf
 from datagen import MNIST
 import sys
 import numpy as np
+import os
 
 def main(model, other):
+    last = os.listdir('./models/')
     if 'grid' in other:
         _grid(model, other)
     else:
