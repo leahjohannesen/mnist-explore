@@ -1,6 +1,8 @@
 from tensorflow.examples.tutorials.mnist import input_data
 import numpy as np
 
+np.random.seed(1)
+
 class MNIST():
     '''
     This is my mnist data generation class.

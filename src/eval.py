@@ -3,14 +3,11 @@ from datagen import MNIST
 import sys
 import numpy as np
 
-tf.set_random_seed(1)
-
 def main(model, other):
-    data = _data(other)
     if 'grid' in other:
-        _grid(data, model, other)
+        _grid(model, other)
     else:
-        _train(data, model, other) 
+        _train(model, other) 
 
 def _data(other):
     #Controls augmentation and returns the appropraite dataset
@@ -24,31 +21,35 @@ def _data(other):
         data = MNIST()
     return data
 
-def _grid(data, model, other):
+def _grid(model, other):
     #Performs grid search, could be more modular
-    n = 5
+    n = 2
     lr_range = np.power(10, np.random.uniform(-6, 1, n))
-    drop_range = np.random.random(n)
+    drop_range = np.random.uniform(0.2, 0.8, n)
     for i in lr_range:
         for j in drop_range:
             print 'Crossval with lr={}, dropout={}'.format(i,j)
-            _train(data, model, other, lr=i, drop=j)
+            _train(model, other, lr=i, drop=j)
 
-def _train(data, model, other=None, lr=1e-4, drop=0.5):
+def _train(model, other=None, lr=1e-4, drop=0.5):
     #Imports the model and creates all the stuff required for running
+    tf.reset_default_graph()
+    tf.set_random_seed(1)
+    
+    data = _data(other)
+
     x = tf.placeholder(tf.float32, shape=[None, 784])
     y = tf.placeholder(tf.float32, shape=[None, 10])
     keep = tf.placeholder(tf.float32)
     
     sys.path.append('/home/ubuntu/mnist-explore/src/models/')
-    mod = __import__('basic')
-
-    y_pred = mod.pred(x)
+    mod = __import__(model)
+    
+    y_pred = mod.pred(x, keep)
     acc = mod.acc(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
     train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
-
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
@@ -57,7 +58,7 @@ def _train(data, model, other=None, lr=1e-4, drop=0.5):
         batch_size = 64
 
         x_val, y_val = data.x_val, data.y_val
-        val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val})
+        val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
         print "Starting Validation Accuray: {}".format(val_acc)
 
         for epoch in range(epochs):

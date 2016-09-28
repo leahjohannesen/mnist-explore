@@ -15,7 +15,7 @@ def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
                         strides=[1, 2, 2, 1], padding='SAME')
 
-def pred(x):
+def pred(x, drop):
     #Reshape the input
     x_reshape = tf.reshape(x, [-1,28,28,1])
 
@@ -40,12 +40,13 @@ def pred(x):
     flatten = tf.reshape(pool2, [-1, 7*7*64])
     dense1 = tf.matmul(flatten, w_3)
     relu3 = tf.nn.relu(dense1 + b_3)
+    drop1 = tf.nn.dropout(relu3, drop)
 
     #Connection to output layer
     w_4 = weight_variable([1024, 10])
     b_4 = bias_variable([10])
 
-    dense2 = tf.matmul(dense1, w_4)
+    dense2 = tf.matmul(drop1, w_4)
     y_pred = tf.nn.softmax(dense2 + b_4)
 
     return y_pred
