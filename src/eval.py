@@ -89,7 +89,7 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                 loss_list.append(loss_val)
 
     if model_dir:
-        utils.save_results(model_dir, loss_list, model, lr, batch_size, drop)
+        utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop)
     return
 
 if __name__ == '__main__':

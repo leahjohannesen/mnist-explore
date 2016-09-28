@@ -16,7 +16,7 @@ def make_dir():
 
     return run_dir
 
-def save_results(run_dir, loss, model, lr, batch, drop):
+def save_results(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop):
     with open(run_dir + 'run_summary.json') as r:
         run_hist = json.load(r)
     run_num = 0
@@ -24,7 +24,9 @@ def save_results(run_dir, loss, model, lr, batch, drop):
         run_num = max(run_hist.keys())
         run_num = int(run_num) + 1
     run_hist[run_num] = {'model': model,
-                         'loss': lr,
+                         'aug': aug_flag,
+                         'aug_val': aug_val,
+                         'lr': lr,
                          'batch': batch,
                          'drop': drop}
     with open(run_dir + 'run_summary.json', 'wb+') as r:
