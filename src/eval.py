@@ -3,13 +3,14 @@ from datagen import MNIST
 import sys
 import numpy as np
 import os
+import utils
 
 def main(model, other):
-    last = os.listdir('./models/')
+    model_dir = utils.make_dir()
     if 'grid' in other:
-        _grid(model, other)
+        _grid(model_dir, model, other)
     else:
-        _train(model, other) 
+        _train(model_dir, model, other) 
 
 def _data(other):
     #Controls augmentation and returns the appropraite dataset
@@ -23,7 +24,7 @@ def _data(other):
         data = MNIST()
     return data
 
-def _grid(model, other):
+def _grid(model_dir, model, other):
     #Performs grid search, could be more modular
     n = 2
     lr_range = np.power(10, np.random.uniform(-6, 1, n))
@@ -33,7 +34,7 @@ def _grid(model, other):
             print 'Crossval with lr={}, dropout={}'.format(i,j)
             _train(model, other, lr=i, drop=j)
 
-def _train(model, other=None, lr=1e-4, drop=0.5):
+def _train(model_dir, model, other=None, lr=1e-4, drop=0.5):
     #Imports the model and creates all the stuff required for running
     tf.reset_default_graph()
     tf.set_random_seed(1)
@@ -59,6 +60,7 @@ def _train(model, other=None, lr=1e-4, drop=0.5):
         epochs = 1
         batch_size = 64
 
+        loss_list = []
         x_val, y_val = data.x_val, data.y_val
         val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
         print "Starting Validation Accuray: {}".format(val_acc)
@@ -77,7 +79,11 @@ def _train(model, other=None, lr=1e-4, drop=0.5):
                 if n%100 == 0:
                     print "Running batch {}.".format(n)
                 n += 1
-                results = sess.run(train_step, feed_dict={x: batch[0], y: batch[1], keep: drop})
+                loss_val, _ = sess.run([loss, train_step], feed_dict={x: batch[0], 
+                                                                  y: batch[1], keep: drop})
+                loss_list.append(loss_val)
+
+    utils.save_results(model_dir, loss_list, model, lr, batch_size, drop)
     return
 
 if __name__ == '__main__':
