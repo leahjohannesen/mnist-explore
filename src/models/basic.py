@@ -1,5 +1,15 @@
 import tensorflow as tf
 
+'''
+This is my version of the basic model presented in the Tensorflow MNIST tutorial.
+3x3x32 conv/relu
+2x2 maxpool
+3x3x64 conv/relu
+2x2 maxpool
+1 fc dense layer with 1024 nodes with relu and dropout
+1 Output layer
+'''
+
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1, seed=1)
   return tf.Variable(initial)
