@@ -18,7 +18,7 @@ Main model hyperparameters:
 '''
 #Basic functions for initializing layers
 def weights_init(shape):
-    return tf.Variable(tf.truncated_normal(shape), seed=1)
+    return tf.Variable(tf.truncated_normal(shape, seed=1))
 
 def bias_init(shape):
     return tf.Variable(tf.constant(0.1))
@@ -36,34 +36,35 @@ def dropout(x, keep):
 
 #Basic block of the model
 #Takes in a convolution layer, adds batch norm, relu, and a new convolution with dropout
-def bn_relu_conv(inputs, w_shape, b_shape, dropout):
+def bn_relu_conv(inputs, w_shape, b_shape, keep):
     batch = tf.contrib.layers.batch_norm(inputs)
     relu = tf.nn.relu(batch)
     w = weights_init(w_shape) 
     b = bias_init(b_shape) 
     conv = conv2d(relu, w)
-    drop = dropout(conv, dropout)
+    drop = dropout(conv, keep)
     return drop
 
 #Adds a batch norm/relu/conv layer and concatenates it with the input layer
-def add_layer(bottom, num_filter, dropout):
+def add_layer(bottom, num_filter, keep):
     num_old = int(bottom.get_shape()[3])
-    brc = bn_relu_conv(bottom, [3,3,num_old,num_filter], [num_filter], dropout)
+    brc = bn_relu_conv(bottom, [3,3,num_old,num_filter], [num_filter], keep)
     concat = tf.concat(3, [bottom, brc])
     return concat
 
 #The transition layer between blocks
 #Performs a bn/relu/conv and then a 2x2 maxpool to reduce the image size
-def transition(bottom, num_filter, dropout):
+def transition(bottom, num_filter, keep):
     num_old = int(bottom.get_shape()[3])
-    brc = bn_relu_conv(bottom, [3,3,num_old,num_filter], [num_filter], dropout)
+    brc = bn_relu_conv(bottom, [3,3,num_old,num_filter], [num_filter], keep)
     pool = maxpool(brc)
     return pool
 
 #This portion puts the model together through the use of looping
 #I've sized it down from the original paper to fit on the smaller GPUs available
-def pred(x, drop_num=0.5, depth=7, first_output=16, growth_rate=12):
+def pred(x, keep, depth=7, first_output=16, growth_rate=12):
 
+    n_classes = 10
     n_channels = first_output
     #First conv layer that starts the model
     with tf.variable_scope("input"):
@@ -76,15 +77,15 @@ def pred(x, drop_num=0.5, depth=7, first_output=16, growth_rate=12):
     for i in range(1,N+1):
         name = "block1-{}".format(i)
         with tf.variable_scope(name): 
-            layer = add_layer(layer, n_channels, dropout)
+            layer = add_layer(layer, n_channels, keep)
         n_channels += growth_rate
     with tf.variable_scope("trans1"):
-        layer = transition(layer, n_channels, dropout)
+        layer = transition(layer, n_channels, keep)
 
     for i in range(1,3):
         name = "block2-{}".format(i)
         with tf.variable_scope(name): 
-            layer = add_layer(layer, n_channels, dropout)
+            layer = add_layer(layer, n_channels, keep)
         n_channels += growth_rate
 
     with tf.variable_scope("output"):
@@ -99,3 +100,8 @@ def pred(x, drop_num=0.5, depth=7, first_output=16, growth_rate=12):
         output = tf.nn.softmax(dense + b)
 
     return output
+
+def acc(y, y_pred):
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_pred,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    return accuracy
