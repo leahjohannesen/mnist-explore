@@ -22,6 +22,7 @@ def main(models):
     ax[0,0].set_ylabel('Loss')
     ax[-1,0].set_xlabel('Batch number')
     ax[0,0].set_title('Model Losses')
+    ax[0,1].set_title('Annotations of Runs')
 
 def make_graph(folder_num, ax_list, ax_idx):
     model_fp = './models/run-{}/'.format(folder_num)
