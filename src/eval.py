@@ -53,7 +53,6 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     mod = __import__(model)
     
     y_pred = mod.pred(x, keep)
-    print y_pred
     acc = mod.acc(y, y_pred)
     acc_class = mod.acc_class(y, y_pred)
 
@@ -132,7 +131,6 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         test_list_acc = np.mean(test_list)
         test_class_acc = test_class_corr / test_class_total
         test_total_acc = np.append(test_list_acc, test_class_acc)
-        print test_total_acc
 
     if model_dir:
         utils.save_train(model_dir, loss_list, model, data.aug, data.aug_val, 

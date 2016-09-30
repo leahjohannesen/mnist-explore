@@ -41,7 +41,7 @@ def save_train(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop, opt):
     print 'Added run under {}: train-{}'.format(run_dir, run_num)
     print '- '*10 + '\n'
 
-def save_test(run_dir, test_acc, model, aug_flag, aug_val, lr, batch, drop):
+def save_test(run_dir, test_acc, model, aug_flag, aug_val, lr, batch, drop, opt):
     with open(run_dir + 'run_summary.json') as r:
         run_hist = json.load(r)
 

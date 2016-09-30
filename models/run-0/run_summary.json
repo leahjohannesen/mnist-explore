@@ -1,1 +1,1 @@
-{"0": {"aug": null, "drop": 0.5, "batch": 64, "aug_val": null, "lr": 0.0001, "model": "basic"}}
+{"0": {"opt": "adam", "aug": null, "drop": 0.5, "batch": 32, "aug_val": null, "lr": 0.0001, "model": "basic"}}
