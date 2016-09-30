@@ -37,10 +37,10 @@ def dropout(x, keep):
 #Basic block of the model
 #Takes in a convolution layer, adds batch norm, relu, and a new convolution with dropout
 def bn_relu_conv(inputs, w_shape, b_shape, keep):
-    batch = tf.contrib.layers.batch_norm(inputs)
-    relu = tf.nn.relu(batch)
     w = weights_init(w_shape) 
     b = bias_init(b_shape) 
+    batch = tf.contrib.layers.batch_norm(inputs)
+    relu = tf.nn.relu(batch+b)
     conv = conv2d(relu, w)
     drop = dropout(conv, keep)
     return drop
