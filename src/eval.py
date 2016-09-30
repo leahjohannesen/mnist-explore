@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import os
 import utils
-from src.models.opts import opts
+from models.opts import opts
 
 def main(model, other):
     if 'log' in other:
@@ -56,7 +56,7 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     acc = mod.acc(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
-    opt = opts(other, lr)
+    opt, opt_val = opts(other, lr)
     train_step = opt.minimize(loss)
 
     with tf.Session() as sess:
@@ -65,6 +65,7 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         epochs = 1 
         batch_size = 32 
         total_train = data.x_train.shape[0]
+        deciles = int(total_train/(10*batch_size))
 
         loss_list = []
         val_list = []
@@ -101,15 +102,15 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                     print "End of Epoch"
                     print "Validation Accuracy: {}\n".format(val_list.mean())
                     break
-                if n%100 == 0:
-                    print "Running batch {}.".format(n)
+                if n%deciles == 0:
+                    print "Percent of epoch complete: {}0%.".format(n/deciles)
                 n += 1
                 loss_val, _ = sess.run([loss, train_step], feed_dict={x: batch[0], 
                                                                   y: batch[1], keep: drop})
                 loss_list.append(loss_val)
 
     if model_dir:
-        utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop)
+        utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop, opt_val)
     return
 
 if __name__ == '__main__':

@@ -135,7 +135,7 @@ class MNIST():
             start = self.curr_idx_val
             end = self.curr_idx_val + n
             self.curr_idx_val = end
-            return (self.x_val[start:end], self.y_train[start:end])
+            return (self.x_val[start:end], self.y_val[start:end])
         
 
 if __name__ == '__main__':
