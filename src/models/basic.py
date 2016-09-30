@@ -75,6 +75,4 @@ def acc_class(y, y_pred):
     one_hot = tf.boolean_mask(one_hot, corr_pred)
     class_total = tf.reduce_sum(y, 0)
     corr_total = tf.reduce_sum(tf.cast(one_hot, tf.float32), 0)
-    class_acc = tf.div(corr_total, class_total)
-    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return class_acc
+    return class_total, corr_total

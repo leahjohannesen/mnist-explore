@@ -9,22 +9,34 @@ import summarize
 
 warnings.simplefilter('ignore', np.RankWarning)
 
-def main(models):
+def main(which, models):
     #summarize.main(models)
-    f, ax = plt.subplots(2, len(models), sharex=True, sharey=True) 
+    if which == 'val':
+        f, ax = plt.subplots(2, len(models), sharex=True, sharey=True) 
+        make_val(f, ax, models)
+    elif which == 'test':
+        f, ax = plt.subplots(2, len(models), sharex=True, sharey=True) 
+        make_test(f, ax, models)
+    elif which == 'all':
+        f1, ax1 = plt.subplots(2, len(models), sharex=True, sharey=True)
+        f2, ax2 = plt.subplots(2, len(models), sharex=True, sharey=True)
+        make_val(f1, ax1, models)
+        make_test(f2, ax2, models)
+
+def make_val(f, ax, models):
     try:
         test = ax.shape[1]
     except:
         ax = ax[np.newaxis]
     for idx, model_folder in enumerate(models):
-        make_graph(model_folder, ax, idx)    
+        make_val_graph(model_folder, ax, idx)    
     f.subplots_adjust(hspace=0, wspace=0.05)
     ax[0,0].set_ylabel('Loss')
     ax[-1,0].set_xlabel('Batch number')
     ax[0,0].set_title('Model Losses')
     ax[0,1].set_title('Annotations of Runs')
 
-def make_graph(folder_num, ax_list, ax_idx):
+def make_val_graph(folder_num, ax_list, ax_idx):
     model_fp = './models/run-{}/'.format(folder_num)
     runs = os.listdir(model_fp)
     summary_fp = runs.pop(0)
@@ -66,6 +78,7 @@ def add_annotation(fp, num, ax):
         start_y -= 0.05
 
 if __name__ == '__main__':
-    models = sys.argv[1:] 
-    main(models)
+    which = sys.argv[1]
+    models = sys.argv[2:] 
+    main(which, models)
     plt.show()

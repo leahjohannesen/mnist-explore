@@ -16,7 +16,7 @@ def make_dir():
 
     return run_dir
 
-def save_results(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop):
+def save_train(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop, opt):
     with open(run_dir + 'run_summary.json') as r:
         run_hist = json.load(r)
     run_num = 0
@@ -28,7 +28,9 @@ def save_results(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop):
                          'aug_val': aug_val,
                          'lr': lr,
                          'batch': batch,
-                         'drop': drop}
+                         'drop': drop,
+                         'opt': opt}
+
     with open(run_dir + 'run_summary.json', 'wb+') as r:
         json.dump(run_hist, r)
     
@@ -38,6 +40,15 @@ def save_results(run_dir, loss, model, aug_flag, aug_val, lr, batch, drop):
     print '\n' + '- '*10
     print 'Added run under {}: train-{}'.format(run_dir, run_num)
     print '- '*10 + '\n'
+
+def save_test(run_dir, test_acc, model, aug_flag, aug_val, lr, batch, drop):
+    with open(run_dir + 'run_summary.json') as r:
+        run_hist = json.load(r)
+
+    run_num = max(run_hist.keys())
+    
+    numpy_path = run_dir + 'test-{}'.format(run_num)
+    np.save(numpy_path, test_acc)
 
 if __name__ == '__main__':
     test_array = np.array([[1,2,3,4],[5,6,7,8]])

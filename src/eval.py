@@ -80,10 +80,8 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
             val_acc = sess.run(acc, feed_dict={x: batch_val[0], y: batch_val[1], keep: 1.0})
             val_list.append(val_acc)
 
-        val_list = np.array(val_list)
-
         print '\n' + '- '*10
-        print "Starting Validation Accuray: {}".format(val_list.mean())
+        print "Starting Validation Accuray: {}".format(np.mean(val_list))
         print '- '*10 + '\n'
 
         #The training regimen
@@ -96,17 +94,18 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                 #the epoch, otherwise returns false and goes into the validation regime
                 batch = data.next_batch(batch_size)
                 if not batch:
-                    val_list = np.array([])
+                    val_list = []
                     while True:
                         batch_val = data.next_batch_val(batch_size)
                         if not batch_val:
                             break
                         val_acc = sess.run(acc, feed_dict={x: batch_val[0], y: batch_val[1], 
                                                            keep: 1.0})
-                        np.append(val_list, val_acc)
+                        val_list.append(val_acc)
                     print "End of Epoch"
-                    print "Validation Accuracy: {}\n".format(val_list.mean())
+                    print "Validation Accuracy: {}\n".format(np.mean(val_list))
                     break
+
                 #Prints the status of the run, every 10%
                 if n%deciles == 0:
                     print "Percent of epoch complete: {}0%.".format(n/deciles)
@@ -114,21 +113,32 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                 loss_val, _ = sess.run([loss, train_step], feed_dict={x: batch[0], 
                                                                   y: batch[1], keep: drop})
                 loss_list.append(loss_val)
-            
-        test_list = np.array([])
-        class_list = np.array([[]])
+
+        test_list = []
+        test_class_total = np.zeros(10)
+        test_class_corr = np.zeros(10)
+
         while True:
             batch_test = data.next_batch_test(batch_size)
             if not batch_test:
                 break
             test_acc = sess.run(acc, feed_dict={x: batch_test[0], y: batch_test[1], keep: 1.0})
-            np.append(test_list, test_acc)
+            test_list.append(test_acc)
             test_class = sess.run(acc_class, feed_dict={x: batch_test[0], y: batch_test[1],
                                                         keep: 1.0})
-            print test_class
+            test_class_total += test_class[0]
+            test_class_corr += test_class[1]
+
+        test_list_acc = np.mean(test_list)
+        test_class_acc = test_class_corr / test_class_total
+        test_total_acc = np.append(test_list_acc, test_class_acc)
+        print test_total_acc
 
     if model_dir:
-        utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop, opt_val)
+        utils.save_train(model_dir, loss_list, model, data.aug, data.aug_val, 
+                           lr, batch_size, drop, opt_val)
+        utils.save_test(model_dir, test_total_acc, model, data.aug, data.aug_val, 
+                           lr, batch_size, drop, opt_val)
     return
 
 if __name__ == '__main__':
