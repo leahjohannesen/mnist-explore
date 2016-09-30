@@ -38,9 +38,8 @@ def dropout(x, keep):
 #Takes in a convolution layer, adds batch norm, relu, and a new convolution with dropout
 def bn_relu_conv(inputs, w_shape, b_shape, keep):
     w = weights_init(w_shape) 
-    b = bias_init(b_shape) 
     batch = tf.contrib.layers.batch_norm(inputs)
-    relu = tf.nn.relu(batch+b)
+    relu = tf.nn.relu(batch)
     conv = conv2d(relu, w)
     drop = dropout(conv, keep)
     return drop
@@ -62,7 +61,7 @@ def transition(bottom, num_filter, keep):
 
 #This portion puts the model together through the use of looping
 #I've sized it down from the original paper to fit on the smaller GPUs available
-def pred(x, keep, depth=7, first_output=16, growth_rate=12):
+def pred(x, keep, depth=13, first_output=16, growth_rate=12):
 
     n_classes = 10
     n_channels = first_output

@@ -60,14 +60,24 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
         
-        epochs = 1
-        batch_size = 64
+        epochs = 1 
+        batch_size = 32 
+        total_train = data.x_train.shape[0]
 
         loss_list = []
-        x_val, y_val = data.x_val, data.y_val
-        val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
+        val_list = []
+
+        while True:
+            batch_val = data.next_batch_val(batch_size)
+            if not batch_val:
+                break
+            val_acc = sess.run(acc, feed_dict={x: batch_val[0], y: batch_val[1], keep: 1.0})
+            val_list.append(val_acc)
+
+        val_list = np.array(val_list)
+
         print '\n' + '- '*10
-        print "Starting Validation Accuray: {}".format(val_acc)
+        print "Starting Validation Accuray: {}".format(val_list.mean())
         print '- '*10 + '\n'
 
         for epoch in range(epochs):
@@ -77,9 +87,17 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
             while True:
                 batch = data.next_batch(batch_size)
                 if not batch:
-                    val_acc = sess.run(acc, feed_dict={x: x_val, y: y_val, keep: 1.0})
+                    val_list = []
+                    while True:
+                        batch_val = data.next_batch_val(batch_size)
+                        if not batch_val:
+                            break
+                        val_acc = sess.run(acc, feed_dict={x: batch_val[0], y: batch_val[1], 
+                                                           keep: 1.0})
+                        val_list.append(val_acc)
+                    val_list = np.array(val_list)
                     print "End of Epoch"
-                    print "Validation Accuracy: {}\n".format(val_acc)
+                    print "Validation Accuracy: {}\n".format(val_list.mean())
                     break
                 if n%100 == 0:
                     print "Running batch {}.".format(n)
