@@ -54,6 +54,7 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     
     y_pred = mod.pred(x, keep)
     acc = mod.acc(y, y_pred)
+    acc_class = mod.acc_class(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
     opt, opt_val = opts(other, lr)
@@ -68,8 +69,9 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         deciles = int(total_train/(10*batch_size))
 
         loss_list = []
-        val_list = []
 
+        #Computes validation accuracy iteratively to avoid blowing up memory
+        val_list = []
         while True:
             batch_val = data.next_batch_val(batch_size)
             if not batch_val:
@@ -83,34 +85,50 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         print "Starting Validation Accuray: {}".format(val_list.mean())
         print '- '*10 + '\n'
 
+        #The training regimen
         for epoch in range(epochs):
             print "-----Starting Epoch {}-----".format(epoch)
             n = 0
 
             while True:
+                #Gets next batch of data, returns tuple of x/y if it hasn't gone through
+                #the epoch, otherwise returns false and goes into the validation regime
                 batch = data.next_batch(batch_size)
                 if not batch:
-                    val_list = []
+                    val_list = np.array([])
                     while True:
                         batch_val = data.next_batch_val(batch_size)
                         if not batch_val:
                             break
                         val_acc = sess.run(acc, feed_dict={x: batch_val[0], y: batch_val[1], 
                                                            keep: 1.0})
-                        val_list.append(val_acc)
-                    val_list = np.array(val_list)
+                        np.append(val_list, val_acc)
                     print "End of Epoch"
                     print "Validation Accuracy: {}\n".format(val_list.mean())
                     break
+                #Prints the status of the run, every 10%
                 if n%deciles == 0:
                     print "Percent of epoch complete: {}0%.".format(n/deciles)
                 n += 1
                 loss_val, _ = sess.run([loss, train_step], feed_dict={x: batch[0], 
                                                                   y: batch[1], keep: drop})
                 loss_list.append(loss_val)
+            
+        test_list = np.array([])
+        class_list = np.array([[]])
+        while True:
+            batch_test = data.next_batch_test(batch_size)
+            if not batch_test:
+                break
+            test_acc = sess.run(acc, feed_dict={x: batch_test[0], y: batch_test[1], keep: 1.0})
+            np.append(test_list, test_acc)
+            test_class = sess.run(acc_class, feed_dict={x: batch_test[0], y: batch_test[1]
+                                                        keep: 1.0})
+            print test_class
 
     if model_dir:
         utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop, opt_val)
+        utils.save_class_acc(
     return
 
 if __name__ == '__main__':
