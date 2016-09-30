@@ -68,7 +68,13 @@ def acc(y, y_pred):
     return accuracy
 
 def acc_class(y, y_pred):
-    guess_loc = tf.argmax(y,1)
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_pred,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return guess_loc 
+    pred_loc = tf.argmax(y_pred, 1)
+    y_loc = tf.argmax(y, 1)
+    corr_pred = tf.equal(y_loc, pred_loc)
+    one_hot = tf.one_hot(pred_loc, 10)
+    one_hot = tf.boolean_mask(one_hot, corr_pred)
+    class_total = tf.reduce_sum(y, 0)
+    corr_total = tf.reduce_sum(tf.cast(one_hot, tf.float32), 0)
+    class_acc = tf.div(corr_total, class_total)
+    #accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    return class_acc

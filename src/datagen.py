@@ -45,6 +45,8 @@ class MNIST():
         
         self.curr_idx_val = None
         self.max_idx_val = None
+        self.curr_idx_test = None
+        self.max_idx_test = None
         
         #Variables for data augmentation
         self.aug = aug
@@ -68,8 +70,10 @@ class MNIST():
         
         self.max_idx = self.x_train.shape[0]
         self.max_idx_val = self.x_val.shape[0]
+        self.max_idx_test = self.x_test.shape[0]
         self.curr_idx = 0
         self.curr_idx_val = 0
+        self.curr_idx_test = 0
         self.idx_list = np.array(range(self.max_idx))
         print '\n' + '- '*10
         print 'Base data generated.'
@@ -136,7 +140,16 @@ class MNIST():
             end = self.curr_idx_val + n
             self.curr_idx_val = end
             return (self.x_val[start:end], self.y_val[start:end])
-        
+
+    def next_batch_test(self,n):
+        if self.curr_idx_test + n > self.max_idx_test:
+            self.curr_idx_test = 0
+            return False
+        else:
+            start = self.curr_idx_test
+            end = self.curr_idx_test + n
+            self.curr_idx_test = end
+            return (self.x_test[start:end], self.y_test[start:end])
 
 if __name__ == '__main__':
     norm = MNIST()

@@ -53,6 +53,7 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     mod = __import__(model)
     
     y_pred = mod.pred(x, keep)
+    print y_pred
     acc = mod.acc(y, y_pred)
     acc_class = mod.acc_class(y, y_pred)
 
@@ -122,13 +123,12 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                 break
             test_acc = sess.run(acc, feed_dict={x: batch_test[0], y: batch_test[1], keep: 1.0})
             np.append(test_list, test_acc)
-            test_class = sess.run(acc_class, feed_dict={x: batch_test[0], y: batch_test[1]
+            test_class = sess.run(acc_class, feed_dict={x: batch_test[0], y: batch_test[1],
                                                         keep: 1.0})
             print test_class
 
     if model_dir:
         utils.save_results(model_dir, loss_list, model, data.aug, data.aug_val, lr, batch_size, drop, opt_val)
-        utils.save_class_acc(
     return
 
 if __name__ == '__main__':
