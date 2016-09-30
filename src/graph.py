@@ -11,14 +11,14 @@ warnings.simplefilter('ignore', np.RankWarning)
 
 def main(models):
     #summarize.main(models)
-    f, ax = plt.subplots(len(models), 2, sharex=True, sharey=True) 
+    f, ax = plt.subplots(2, len(models), sharex=True, sharey=True) 
     try:
         test = ax.shape[1]
     except:
         ax = ax[np.newaxis]
     for idx, model_folder in enumerate(models):
         make_graph(model_folder, ax, idx)    
-    f.subplots_adjust(hspace=0, wspace=0)
+    f.subplots_adjust(hspace=0, wspace=0.05)
     ax[0,0].set_ylabel('Loss')
     ax[-1,0].set_xlabel('Batch number')
     ax[0,0].set_title('Model Losses')
@@ -29,9 +29,9 @@ def make_graph(folder_num, ax_list, ax_idx):
     runs = os.listdir(model_fp)
     summary_fp = runs.pop(0)
 
-    add_annotation(model_fp, folder_num, ax_list[ax_idx, 1])
+    add_annotation(model_fp, folder_num, ax_list[1, ax_idx])
     for idx, run_fp in enumerate(runs):
-        graph_numpy(model_fp + 'train-{}.npy'.format(idx), idx, ax_list[ax_idx, 0])
+        graph_numpy(model_fp + 'train-{}.npy'.format(idx), idx, ax_list[0, ax_idx])
 
 def graph_numpy(fp, idx, ax):
     colors = sbn.color_palette('muted')

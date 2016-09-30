@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import os
 import utils
+from src.models.opts import opts
 
 def main(model, other):
     if 'log' in other:
@@ -13,7 +14,7 @@ def main(model, other):
     if 'grid' in other:
         _grid(model_dir, model, other)
     else:
-        _train(model_dir, model, other) 
+        _train(model_dir, model, other)
 
 def _data(other):
     #Controls augmentation and returns the appropraite dataset
@@ -55,7 +56,8 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     acc = mod.acc(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+    opt = opts(other, lr)
+    train_step = opt.minimize(loss)
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
