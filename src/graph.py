@@ -56,9 +56,12 @@ def make_test_graph(folder_num, ax_list, ax_idx):
     model_fp = './models/run-{}/'.format(folder_num)
     runs = os.listdir(model_fp)
     n_runs = (len(runs)-1)/2
+    bar_width = 0.5/n_runs
     add_annotation(model_fp, folder_num, ax_list[1, ax_idx])
     for idx in range(n_runs):
-        graph_acc(model_fp + 'test-{}.npy'.format(idx), idx, ax_list[0, ax_idx])
+        graph_acc(model_fp + 'test-{}.npy'.format(idx), idx, ax_list[0, ax_idx], bar_width)
+    ax_list[0, ax_idx].set_xticks(np.arange(11) + 0.2)
+    ax_list[0, ax_idx].set_xticklabels(['Total','0','1','2','3','4','5','6','7','8','9'])
     [plt.setp(plot.get_xticklabels(), visible=True) for plot in ax_list[0]]
 
 def graph_loss(fp, idx, ax):
@@ -73,15 +76,12 @@ def graph_loss(fp, idx, ax):
     ax.plot(batch, mean, c=colors[idx], alpha=0.2)
     ax.legend()
 
-def graph_acc(fp, idx, ax):
+def graph_acc(fp, idx, ax, width):
     colors = sbn.color_palette('muted')
     arr = np.load(fp)
-    width = 0.15
     plt_label = 'Subrun-{}'.format(idx)
     x_axis = np.arange(11)
     ax.bar(x_axis + width*idx, arr, width, color=colors[idx], label=plt_label)
-    ax.set_xticks(x_axis + 0.2)
-    ax.set_xticklabels(['Total','0','1','2','3','4','5','6','7','8','9'])
     ax.legend()
 
 def add_annotation(fp, num, ax):
