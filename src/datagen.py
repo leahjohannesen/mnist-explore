@@ -50,7 +50,7 @@ class MNIST():
         
         #Variables for data augmentation
         self.aug = aug
-        self.aug_val = aug_val
+        self.aug_val = float(aug_val)
 
         #Initialize the attributes
         self._base_data()
@@ -77,7 +77,6 @@ class MNIST():
         self.idx_list = np.array(range(self.max_idx))
         print '\n' + '- '*10
         print 'Base data generated.'
-        return
     
     def _aug_data(self):
         if self.aug == 'aug_noise':
@@ -91,7 +90,6 @@ class MNIST():
         else:
             print 'No augmentations.'
             print '- '*10 + '\n'
-        return
     
     def _add_noise(self):
         train_aug = np.random.normal(0, self.aug_val, self.x_train.shape) * 1 / 255.
@@ -102,13 +100,14 @@ class MNIST():
         
         self.x_train = np.clip(noisy_train, 0, 1)
         self.x_val = np.clip(noisy_val, 0, 1)
-        return
 
     def _mislabel(self):
         n_train = self.y_train.shape[0]
         n_val = self.y_val.shape[0]
-        train_idx = np.random.choice(n_train, int(n_train * self.aug_val), replace=False)
-        val_idx = np.random.choice(n_val, int(n_val * self.aug_val), replace=False)
+        mis_train = int(n_train * self.aug_val)
+        mis_val = int(n_val * self.aug_val)
+        train_idx = np.random.choice(n_train, mis_train, replace=False)
+        val_idx = np.random.choice(n_val, mis_val, replace=False)
 
         train_shuffle = self.y_train[train_idx]
         np.random.shuffle(train_shuffle)
@@ -117,9 +116,8 @@ class MNIST():
         val_shuffle = self.y_val[val_idx]
         np.random.shuffle(val_shuffle)
         self.y_val[val_idx] = val_shuffle
-        return
 
-    def next_batch(self,n):
+    def next_batch(self, n):
         if self.curr_idx + n > self.max_idx:
             self.curr_idx = 0
             np.random.shuffle(self.idx_list)
@@ -129,9 +127,9 @@ class MNIST():
             end = self.curr_idx + n
             idx = self.idx_list[start:end]
             self.curr_idx = end
-            return (self.x_train[idx], self.y_train[idx])
+            return self.x_train[idx], self.y_train[idx]
     
-    def next_batch_val(self,n):
+    def next_batch_val(self, n):
         if self.curr_idx_val + n > self.max_idx_val:
             self.curr_idx_val = 0
             return False
@@ -139,9 +137,9 @@ class MNIST():
             start = self.curr_idx_val
             end = self.curr_idx_val + n
             self.curr_idx_val = end
-            return (self.x_val[start:end], self.y_val[start:end])
+            return self.x_val[start:end], self.y_val[start:end]
 
-    def next_batch_test(self,n):
+    def next_batch_test(self, n):
         if self.curr_idx_test + n > self.max_idx_test:
             self.curr_idx_test = 0
             return False
@@ -149,7 +147,7 @@ class MNIST():
             start = self.curr_idx_test
             end = self.curr_idx_test + n
             self.curr_idx_test = end
-            return (self.x_test[start:end], self.y_test[start:end])
+            return self.x_test[start:end], self.y_test[start:end]
 
 if __name__ == '__main__':
     norm = MNIST()
