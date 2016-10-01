@@ -24,28 +24,44 @@ def main(which, models):
         make_test(f2, ax2, models)
 
 def make_val(f, ax, models):
-    try:
-        test = ax.shape[1]
-    except:
-        ax = ax[np.newaxis]
+    if ax.ndim == 1:
+        ax = ax[:,np.newaxis]
     for idx, model_folder in enumerate(models):
         make_val_graph(model_folder, ax, idx)    
-    f.subplots_adjust(hspace=0, wspace=0.05)
+    f.subplots_adjust(hspace=0.1, wspace=0.05)
     ax[0,0].set_ylabel('Loss')
-    ax[-1,0].set_xlabel('Batch number')
+    ax[0,0].set_xlabel('Batch number')
     ax[0,0].set_title('Model Losses')
-    ax[0,1].set_title('Annotations of Runs')
+
+def make_test(f, ax, models):
+    if ax.ndim == 1:
+        ax = ax[:,np.newaxis]
+    for idx, model_folder in enumerate(models):
+        make_test_graph(model_folder, ax, idx)    
+    f.subplots_adjust(hspace=0.1, wspace=0.05)
+    ax[0,0].set_ylabel('Accuracy')
+    ax[0,0].set_xlabel('Total, Class')
+    ax[0,0].set_title('Test Accuracy by Total/Class')
 
 def make_val_graph(folder_num, ax_list, ax_idx):
     model_fp = './models/run-{}/'.format(folder_num)
     runs = os.listdir(model_fp)
-    summary_fp = runs.pop(0)
-
+    n_runs = (len(runs)-1)/2
     add_annotation(model_fp, folder_num, ax_list[1, ax_idx])
-    for idx, run_fp in enumerate(runs):
-        graph_numpy(model_fp + 'train-{}.npy'.format(idx), idx, ax_list[0, ax_idx])
+    for idx in range(n_runs):
+        graph_loss(model_fp + 'train-{}.npy'.format(idx), idx, ax_list[0, ax_idx])
+    [plt.setp(plot.get_xticklabels(), visible=True) for plot in ax_list[0]]
 
-def graph_numpy(fp, idx, ax):
+def make_test_graph(folder_num, ax_list, ax_idx):
+    model_fp = './models/run-{}/'.format(folder_num)
+    runs = os.listdir(model_fp)
+    n_runs = (len(runs)-1)/2
+    add_annotation(model_fp, folder_num, ax_list[1, ax_idx])
+    for idx in range(n_runs):
+        graph_acc(model_fp + 'test-{}.npy'.format(idx), idx, ax_list[0, ax_idx])
+    [plt.setp(plot.get_xticklabels(), visible=True) for plot in ax_list[0]]
+
+def graph_loss(fp, idx, ax):
     colors = sbn.color_palette('muted')
     arr = np.load(fp)
     mean = arr.mean(axis=1)
@@ -55,6 +71,17 @@ def graph_numpy(fp, idx, ax):
     plt_label = 'Subrun-{}'.format(idx)
     ax.plot(batch,fit(batch), c=colors[idx], label=plt_label)
     ax.plot(batch, mean, c=colors[idx], alpha=0.2)
+    ax.legend()
+
+def graph_acc(fp, idx, ax):
+    colors = sbn.color_palette('muted')
+    arr = np.load(fp)
+    width = 0.15
+    plt_label = 'Subrun-{}'.format(idx)
+    x_axis = np.arange(11)
+    ax.bar(x_axis + width*idx, arr, width, color=colors[idx], label=plt_label)
+    ax.set_xticks(x_axis + 0.2)
+    ax.set_xticklabels(['Total','0','1','2','3','4','5','6','7','8','9'])
     ax.legend()
 
 def add_annotation(fp, num, ax):
