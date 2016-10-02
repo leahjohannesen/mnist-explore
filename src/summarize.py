@@ -37,7 +37,7 @@ def acc(fp):
     labels = ['Total','0','1','2','3','4','5','6','7','8','9']
     zipped = zip(labels, test_acc)
     for lab, acc in zipped:
-        print '{}: {}'.format(lab,acc)
+        print '{}: {:.2f}'.format(lab,acc*100)
 
 if __name__ == '__main__':
     models = sys.argv[1:] 
