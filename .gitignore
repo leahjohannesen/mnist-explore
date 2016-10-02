@@ -1,3 +1,4 @@
 MNIST_data/
 *.swp
 *.pyc
+.DS_store

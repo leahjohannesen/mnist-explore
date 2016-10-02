@@ -12,8 +12,11 @@ Several factors are being explored:
 * The effects of mislabeled data on the classification performance
 
 ## Repo Structure
-* Exploration - Contains markdown files with Q/A and model accuracy evaluations
-* Images - Contains saved images for analysis
+* Exploration - Contains the explanations of the project
+  * answers.md - Contains the questions and answers
+  * additional_exploration.md - Additional comparison and exploration of architectures/hyperparameters
+  * runlog - File containing brief descriptions of all the runs for quick reference
+  * Images - Contains saved images for analysis
 * Models - The saved jsons/numpy arrays of run performances
 * src - The scripts used in the analysis
   * pymodels - Folder containing python files, one for each model

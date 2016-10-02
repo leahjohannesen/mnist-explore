@@ -24,12 +24,20 @@ def summarize(folder_num):
     summary_fp = runs.pop(0)
     with open(model_fp + 'run_summary.json', 'r') as j:
         summary = json.load(j)
-    for idx, run_fp in enumerate(runs):
+    for idx in range(len(runs)/2):
         print '- '*10
         print 'Summary for training sub-run {}.'.format(idx)
         for key, val in summary[str(idx)].iteritems():
             print '{}: {}'.format(key,val)
         print '- '*10
+        acc(model_fp + 'test-{}.npy'.format(idx))
+
+def acc(fp):
+    test_acc = np.load(fp)
+    labels = ['Total','0','1','2','3','4','5','6','7','8','9']
+    zipped = zip(labels, test_acc)
+    for lab, acc in zipped:
+        print '{}: {:.2f}'.format(lab,acc*100)
 
 if __name__ == '__main__':
     models = sys.argv[1:] 
