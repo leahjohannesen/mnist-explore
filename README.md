@@ -13,7 +13,7 @@ Several factors are being explored:
 
 ## Repo Structure
 * Exploration - Contains markdown files with Q/A and model accuracy evaluations
-* Images - Contains saved images for analysis
+  * Images - Contains saved images for analysis
 * Models - The saved jsons/numpy arrays of run performances
 * src - The scripts used in the analysis
   * pymodels - Folder containing python files, one for each model
