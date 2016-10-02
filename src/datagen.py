@@ -51,7 +51,7 @@ class MNIST():
         
         #Variables for data augmentation
         self.aug = aug
-        self.aug_val = float(aug_val)
+        self.aug_val = aug_val
 
         #Initialize the attributes
         self._base_data()
@@ -110,6 +110,7 @@ class MNIST():
         #swaps a number of class labels around equal to aug_val
         n_train = self.y_train.shape[0]
         n_val = self.y_val.shape[0]
+        self.aug_val = float(self.aug_val)
         mis_train = int(n_train * self.aug_val)
         mis_val = int(n_val * self.aug_val)
         train_idx = np.random.choice(n_train, mis_train, replace=False)
