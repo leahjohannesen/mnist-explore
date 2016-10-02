@@ -3,6 +3,12 @@ import sys
 import os
 import json
 
+'''
+A quick little utility to describe the runs in case you forget what
+they were. This produces the same information as the annotations
+in the graphing file.
+'''
+
 def main(models):
     print '\n' + '--'*10
     print 'Summarizing runs {}.'.format(', '.join(models))

@@ -24,12 +24,13 @@ class MNIST():
                 0-1.
             _mislabel - Randomly swaps the labels for a number of rows determined
                 by aug_val.
-            next - Returns next n datapoints from the training set.
+            next_batch(n) - Returns next n datapoints from the training set.
                 Once it reaches the end of the data, shuffles the indices and starts over.
+            next_val_batch(n) - Returns next n datapoints from the validation set.
+            next_test_batch(n) - Returns next n datapoints from the test set.
     '''
 
     def __init__(self, aug=None, aug_val=None):
-
         #Data storing variables
         self.x_train = None
         self.x_val = None
@@ -68,6 +69,7 @@ class MNIST():
         self.y_val = mnist.validation.labels
         self.y_test = mnist.test.labels
         
+        #setting a bunch of default values/indices
         self.max_idx = self.x_train.shape[0]
         self.max_idx_val = self.x_val.shape[0]
         self.max_idx_test = self.x_test.shape[0]
@@ -79,6 +81,7 @@ class MNIST():
         print 'Base data generated.'
     
     def _aug_data(self):
+        #if there's an aug argument passed, augment the data
         if self.aug == 'aug_noise':
             print 'Adding noise to data.'
             print '- '*10 + '\n'
@@ -92,6 +95,8 @@ class MNIST():
             print '- '*10 + '\n'
     
     def _add_noise(self):
+        #adds a random amount of gaussian noise with mean=0, std=aug_val
+        #then clips the data to keep it between 0 and 1
         train_aug = np.random.normal(0, self.aug_val, self.x_train.shape) * 1 / 255.
         val_aug = np.random.normal(0, self.aug_val, self.x_val.shape) * 1 / 255.
                 
@@ -102,6 +107,7 @@ class MNIST():
         self.x_val = np.clip(noisy_val, 0, 1)
 
     def _mislabel(self):
+        #swaps a number of class labels around equal to aug_val
         n_train = self.y_train.shape[0]
         n_val = self.y_val.shape[0]
         mis_train = int(n_train * self.aug_val)

@@ -2,6 +2,15 @@ import numpy as np
 import os
 import json
 
+'''
+These utilities allow for saving the model results.
+make_dir - Creates the directory that the model will be saved in
+save_train() - Saves the loss history as a numpy array and the 
+    parameters of the model in a json
+save_test() - Saves the test results as a numpy array and the
+    parameters of the model in a json
+'''
+
 def make_dir():
     folders = os.listdir('./models/')
     next_num = len(folders)

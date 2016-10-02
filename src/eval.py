@@ -6,6 +6,20 @@ import os
 import utils
 from models.opts import opts
 
+'''
+The main file that runs the training of the net.
+Required sysargs:
+    model - first sysarg should be the model that you want to run, ex "basic" for basic.py
+Current optional sysargs:
+    grid - performs a grid search as described in _grid()
+    log - logs the training information into a json for parameters and 
+        numpy arrays for loss/test results
+    aug_noise/aug_miss - uses augmented data as described in 
+        datagen.py, must be followed the value of augment 
+        ex. aug_noise 8 - will produce augmented data with gaussian noise with mean=0, stdev=8
+    sgd/momentum/adadelta/adagrad - adds another optimizer to replace adam 
+'''
+
 def main(model, other):
     if 'log' in other:
         model_dir = utils.make_dir()
@@ -29,17 +43,18 @@ def _data(other):
     return data
 
 def _grid(model_dir, model, other):
-    #Performs grid search, could be more modular
+    #Performs grid search calling _train for various combos of hyperparameters
+    #This could be more modular, but there are so many optional sysargs
+    # as it, it could get messy
     n = 2
     lr_range = np.power(10, np.random.uniform(-6, 1, n))
     drop_range = np.random.uniform(0.2, 0.8, n)
     for i in lr_range:
         for j in drop_range:
-            print 'Crossval with lr={}, dropout={}'.format(i,j)
+            print 'Crossval with lr={}, dropout={}\n'.format(i,j)
             _train(model_dir, model, other, lr=i, drop=j)
 
 def _train(model_dir, model, other, lr=1e-4, drop=0.5):
-    #Imports the model and creates all the stuff required for running
     tf.reset_default_graph()
     tf.set_random_seed(1)
     
@@ -49,6 +64,8 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     y = tf.placeholder(tf.float32, shape=[None, 10])
     keep = tf.placeholder(tf.float32)
     
+    #Nifty way I found to dynamically import models
+    #Each model file should contain a pred, acc, and acc_cass function
     sys.path.append('/home/ubuntu/mnist-explore/src/models/')
     mod = __import__(model)
     
@@ -57,18 +74,18 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
     acc_class = mod.acc_class(y, y_pred)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(y_pred, y)
+    #This calls the optimizer from the opts.py module. Helps with clutter.
     opt, opt_val = opts(other, lr)
     train_step = opt.minimize(loss)
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
         
+        #Some constats/variables used in the training
         epochs = 1 
         batch_size = 32 
         total_train = data.x_train.shape[0]
         deciles = int(total_train/(10*batch_size))
-
-        loss_list = []
 
         #Computes validation accuracy iteratively to avoid blowing up memory
         val_list = []
@@ -82,8 +99,9 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         print '\n' + '- '*10
         print "Starting Validation Accuray: {}".format(np.mean(val_list))
         print '- '*10 + '\n'
+        loss_list = []
 
-        #The training regimen
+        #The actual training regimen
         for epoch in range(epochs):
             print "-----Starting Epoch {}-----".format(epoch)
             n = 0
@@ -113,10 +131,11 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
                                                                   y: batch[1], keep: drop})
                 loss_list.append(loss_val)
 
+        #Similar to the validation run, returns results of the test pass from batches
+        #Also returns a class based accuracy and concatenates them all into arrays
         test_list = []
         test_class_total = np.zeros(10)
         test_class_corr = np.zeros(10)
-
         while True:
             batch_test = data.next_batch_test(batch_size)
             if not batch_test:
@@ -132,12 +151,13 @@ def _train(model_dir, model, other, lr=1e-4, drop=0.5):
         test_class_acc = test_class_corr / test_class_total
         test_total_acc = np.append(test_list_acc, test_class_acc)
 
+    #If log was called, model_dir will exist. If it does, pass all the info
+    #into the utility that saves all the hyper parameters 
     if model_dir:
         utils.save_train(model_dir, loss_list, model, data.aug, data.aug_val, 
                            lr, batch_size, drop, opt_val)
         utils.save_test(model_dir, test_total_acc, model, data.aug, data.aug_val, 
                            lr, batch_size, drop, opt_val)
-    return
 
 if __name__ == '__main__':
     model = sys.argv[1]

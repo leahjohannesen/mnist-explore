@@ -2,6 +2,7 @@ import tensorflow as tf
 
 '''
 This is my version of the basic model presented in the Tensorflow MNIST tutorial.
+
 3x3x32 conv/relu
 2x2 maxpool
 3x3x64 conv/relu

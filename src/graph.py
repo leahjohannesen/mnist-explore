@@ -6,11 +6,29 @@ import os
 import json
 import warnings
 import summarize
-
 warnings.simplefilter('ignore', np.RankWarning)
 
+'''
+This module produces graphs that have been stored during trainig.
+Calling this script requires two sysargs:
+    'all', 'val' or 'test' - which graphs you want to see
+    # of the runs - specifiy which runs you want to compare
+Ex.
+    python src/graph.py all 0 1 2 3
+    Will bring up the validation/loss graph and the test/class acc graph
+    for runs 0 1 2 and 3.
+
+Functions:
+    main - determines which of the models run
+    make_val - makes a pair of graph/annotations for each folder/model passed in
+    make_test - does the same as make_val but for the test graphs
+    make_val_graph - loops over each sub-run (if grid searched) and adds the graph/annotations 
+    make_test_graph - loops over each sub-run and adds the graphs/annotations
+    graph_loss/graph - creates the graphs for each sub-model
+    add_annotations - creates the annotated axis
+'''
+
 def main(which, models):
-    #summarize.main(models)
     if which == 'val':
         f, ax = plt.subplots(2, len(models), sharex=True, sharey=True) 
         make_val(f, ax, models)
@@ -30,7 +48,7 @@ def make_val(f, ax, models):
         make_val_graph(model_folder, ax, idx)    
     f.subplots_adjust(hspace=0.1, wspace=0.05)
     ax[0,0].set_ylabel('Loss')
-    ax[0,0].set_xlabel('Batch number')
+    ax[0,0].set_xlabel('Batch Number')
     ax[0,0].set_title('Model Losses')
 
 def make_test(f, ax, models):
