@@ -47,8 +47,8 @@ def _grid(model_dir, model, other):
     #This could be more modular, but there are so many optional sysargs
     # as it, it could get messy
     n = 3
-    lr_range = np.power(10, np.random.uniform(-6, 1, n))
-    drop_range = np.random.uniform(0.2, 0.8, n)
+    lr_range = np.power(10, np.random.uniform(-5, -3, n))
+    drop_range = np.random.uniform(0.3, 0.8, n)
     for i in lr_range:
         for j in drop_range:
             print 'Crossval with lr={}, dropout={}\n'.format(i,j)
