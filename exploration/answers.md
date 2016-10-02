@@ -4,30 +4,32 @@
 ![Model acc](./images/run0acc.png)
 
 
-#### What is your test set error rate?
-Total: 95.66
-#### What is the test set error rate for each class? Are some classes more challenging than others to distinguish from each other? Why?
-0: 98.37 <br>
-1: 99.12 <br>
-2: 92.82 <br>
-3: 93.06 <br>
-4: 98.37 <br>
-5: 97.87 <br>
-6: 94.98 <br>
-7: 92.89 <br>
-8: 96.30 <br>
-9: 92.96 <br>
+### What is your test set error rate?
+### What is the test set error rate for each class? Are some classes more challenging than others to distinguish from each other? Why?
+|Class|Acc|
+|-----|-----|
+|Total|95.66|
+|0    |98.37|
+|1    |99.12|
+|2    |92.82|
+|3    |93.06|
+|4    |98.37|
+|5    |97.87|
+|6    |94.98|
+|7    |92.89|
+|8    |96.30|
+|9    |92.96|
 
 Some classes are much harder to predict than others. Looking at some of the misclassified examples, it's easy to see why the 7s could be misinterpreted as 1s or 9s. Similar with the 9s being interpreted as 1s or 7s or even 4s.
 
 2s and 3s I think occasionally get misinterpreted as each other and 8s.
 
-#### Based only on information gathered in the first epoch of training, do you think that the model would benefit from more training time? Why?
+### Based only on information gathered in the first epoch of training, do you think that the model would benefit from more training time? Why?
 I know from previous experience with this data set that model will indeed get better with additional time. However, I think this can also be seen in the graph of the loss function. It is still declining as we end the epoch.
 
 The best way to really see this, is tracking the validation loss at the end of each epoch.
 
-#### Besides training for a longer time, what would you do to improve accuracy?
+### Besides training for a longer time, what would you do to improve accuracy?
 There are several additional hyperparameters that could be tuned to possible improve accuracy. Faster learning rates will get you to the final accuracy faster. Possibly additional layers. Additional dropout/regularization might help. Batch normalization might help. Changing the optimization function and activation functions might help as well.
 
 I will explore these in the additional exploration file.
@@ -51,14 +53,14 @@ I will explore these in the additional exploration file.
 |8    |96.30|95.99|94.35|76.36|
 |9    |92.96|94.05|93.35|87.80|
 
-#### What are the implications of the dependence of accuracy on noise if you were to deploy a production classifier? How much noise do you think a production classifier could tolerate?
+### What are the implications of the dependence of accuracy on noise if you were to deploy a production classifier? How much noise do you think a production classifier could tolerate?
 The pretty obvious implication is that the noisier your training set is, the harder time the network has with your test set.
 
 I think the level of noise it could tolerate is dependent on the purpose of your classifier. Overall the accuracy holds pretty well between runs 0, 1, and 2. And doesn't take a big dip until run 3 (128 stdev).
 
 If the goal is overall accuracy and the loss of certain class accuracy is acceptable, the classifier can take a lot more noise while still producing reasonable results.
 
-#### Do you think that Gaussian noise is an appropriate model for real-world noise if the characters were acquired by standard digital photography? If so, in what situations? How would you compensate for it?
+### Do you think that Gaussian noise is an appropriate model for real-world noise if the characters were acquired by standard digital photography? If so, in what situations? How would you compensate for it?
 
 My intuition would be against gaussian noise being the most common source. I would imagine noise would appear in scale/chunks. Ie lighter or darker en masse, or if there was a particular light source, it would be distributed across a certain portion of the picture if there was certain brighter/darker areas.
 
@@ -66,7 +68,7 @@ However, after a bit more research, apparently Gaussian noise is pretty common i
 
 While there are various forms of filtering that can be applied outside a neural net, things like dropout can help with noise by requiring the net to become reliant on multiple nodes, rather than just 1. This ensures that if the noise is normally distributed, there should be enough unaffected nodes to offset the highly impacted ones.
 
-#### Is the accuracy of certain classes affected more by image noise than others? Why?
+### Is the accuracy of certain classes affected more by image noise than others? Why?
 
 Some classes are certainly impacted more than others. Looking at the table above, 0 and 1 experience almost no real drop in accuracy even with the most extreme amount of noise.
 
@@ -93,7 +95,7 @@ My intuition for this is that 8 is already composed of all the parts of your oth
 |8    |96.30|94.14|90.75|93.01|
 |9    |92.96|92.66|91.67|92.16|
 
-#### How important are accurate training labels to classifier accuracy?
+### How important are accurate training labels to classifier accuracy?
 This one was probably the most interesting set of results to me. It looks as if, while the mislabeling has an impact on training and validation accuracies, the test set accuracy remains mostly unchanged.
 
 Therefore, the issue is not so much with accurate predictions, but with a false sense of poor model fit.
@@ -102,7 +104,7 @@ During a typical training scenario, you'd assume all the data would be equally m
 
 This leads to the greatest risk: abandoning good models due to misinformation.
 
-#### How would you compensate for label noise? Assume you have a large budget available but you want to use it as efficiently as possible.
+### How would you compensate for label noise? Assume you have a large budget available but you want to use it as efficiently as possible.
 
 As hinted at above, given enough data/epochs, the model can overcome a mislabeled data set. However, the main issue would be incorrectly assuming your model is bad based off a low validation/test performance.
 
@@ -112,7 +114,7 @@ The training set is definitely lowest priority given the results. After that, I 
 
 I personally would lean towards cleaning up validation data first. This is usually the metric used for comparing and judging models vs each other. Test accuracy is typically not used until after the model is chosen, and is used to report out on.
 
-#### How would you quantify the amount of label noise if you had a noisy data set?
+### How would you quantify the amount of label noise if you had a noisy data set?
 
 Assuming you have a noisy train/val and clean test set, I would quantify it with the difference between the validation and test accuracies.
 
@@ -120,7 +122,7 @@ A significant drop in your validation accuracy while maintaining a consistent te
 
 You can even somewhat see this trend already in training loss graphs above.
 
-#### If your real-world data had both image noise and label noise, which would you be more concerned about? Which is easier to compensate for?
+### If your real-world data had both image noise and label noise, which would you be more concerned about? Which is easier to compensate for?
 
 From a ground truth accuracy perspective, I'd be much more concerned about image noise. It significantly impacts the predictions given a clean test set.
 
