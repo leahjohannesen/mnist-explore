@@ -3,9 +3,9 @@ import tensorflow as tf
 '''
 This is my version of the basic model presented in the Tensorflow MNIST tutorial.
 
-3x3x32 conv/relu
+3x3x32 conv/relu/drop
 2x2 maxpool
-3x3x64 conv/relu
+3x3x64 conv/relu/drop
 2x2 maxpool
 1 fc dense layer with 1024 nodes with relu and dropout
 1 Output layer

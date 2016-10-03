@@ -3,13 +3,13 @@ import tensorflow as tf
 '''
 This is my version of the basic model presented in the Tensorflow MNIST tutorial.
 
-3x3x32 conv/relu/drop
-3x3x64 conv/relu/drop
+3x3x32 conv/batch/relu/dropout
+3x3x64 conv/batch/relu/dropout
 2x2 maxpool
-3x3x128 conv/relu/drop
-3x3x256 conv/relu/drop
+3x3x128 conv/batch/relu/dropout
+3x3x256 conv/batch/relu/dropout
 2x2 maxpool
-Output layer
+output layer
 '''
 
 def weight_variable(shape):
@@ -27,37 +27,40 @@ def max_pool_2x2(x):
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
                         strides=[1, 2, 2, 1], padding='SAME')
 
+def bn(x):
+    return tf.contrib.layers.batch_norm(x)
+
 def pred(x, drop):
     #Reshape the input
     x_reshape = tf.reshape(x, [-1,28,28,1])
 
     w_1 = weight_variable([5,5,1,32])
-    b_1 = bias_variable([32])
 
     conv1 = conv2d(x_reshape, w_1)
-    relu1 = tf.nn.relu(conv1 + b_1)
+    batch1 = bn(conv1)
+    relu1 = tf.nn.relu(batch1)
     drop1 = tf.nn.dropout(relu1, drop, seed=1)
 
     w_2 = weight_variable([5, 5, 32, 64])
-    b_2 = bias_variable([64])
 
     conv2 = conv2d(drop1, w_2)
-    relu2 = tf.nn.relu(conv2 + b_2)
+    batch2 = bn(conv2)
+    relu2 = tf.nn.relu(batch2)
     drop2 = tf.nn.dropout(relu2, drop, seed=1)
     pool2 = max_pool_2x2(drop2)
 
     w_3 = weight_variable([5,5,64,128])
-    b_3 = bias_variable([128])
 
     conv3 = conv2d(pool2, w_3)
-    relu3 = tf.nn.relu(conv3 + b_3)
+    batch3 = bn(conv3)
+    relu3 = tf.nn.relu(batch3)
     drop3 = tf.nn.dropout(relu3, drop, seed=1)
 
     w_4 = weight_variable([5, 5, 128, 256])
-    b_4 = bias_variable([256])
 
     conv4 = conv2d(drop3, w_4)
-    relu4 = tf.nn.relu(conv4 + b_4)
+    batch4 = bn(conv4)
+    relu4 = tf.nn.relu(batch4)
     drop4 = tf.nn.dropout(relu4, drop, seed=1)
     pool4 = max_pool_2x2(drop4)
 
