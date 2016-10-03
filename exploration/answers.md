@@ -1,3 +1,9 @@
+# Q/A
+
+For all of these, I will use comparisons of the basic MNIST model. It will provide a good foundation for most of the insights to the questions.
+
+I'll leave additional exploration to the appropriately named md file.
+
 # Part 1: Classifier on original data
 
 ![Model loss](./images/run0loss.png)

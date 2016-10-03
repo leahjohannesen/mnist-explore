@@ -83,23 +83,25 @@ def make_test_graph(folder_num, ax_list, ax_idx):
     [plt.setp(plot.get_xticklabels(), visible=True) for plot in ax_list[0]]
 
 def graph_loss(fp, idx, ax, ax_idx):
-    colors = sbn.color_palette('muted')
+    colors = sbn.color_palette('Set1', n_colors=10)
     arr = np.load(fp)
     mean = arr.mean(axis=1)
     batch = np.arange(len(mean))
     fit = np.poly1d(np.polyfit(batch,mean,50))
 
     plt_label = 'Subrun-{}'.format(idx)
-    ax.plot(batch,fit(batch), c=colors[ax_idx + idx], label=plt_label)
-    ax.plot(batch, mean, c=colors[ax_idx + idx], alpha=0.2)
+    color_idx = (ax_idx + idx) % 10
+    ax.plot(batch,fit(batch), c=colors[color_idx], label=plt_label)
+    ax.plot(batch, mean, c=colors[color_idx], alpha=0.2)
     ax.legend()
 
 def graph_acc(fp, idx, ax, width, ax_idx):
-    colors = sbn.color_palette('muted')
+    colors = sbn.color_palette('Set1', n_colors=10)
     arr = np.load(fp)
     plt_label = 'Subrun-{}'.format(idx)
     x_axis = np.arange(11)
-    ax.bar(x_axis + width*idx, arr, width, color=colors[ax_idx + idx], label=plt_label)
+    color_idx = (ax_idx + idx) % 10
+    ax.bar(x_axis + width*idx, arr, width, color=colors[color_idx], label=plt_label)
     ax.set_ylim([0.8, 1])
     ax.legend()
 

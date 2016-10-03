@@ -3,10 +3,9 @@ This repo contains an exploration of the MNIST data set using Tensorflow.<br>
 Several factors are being explored:
 * Accuracy impacts of various types of model architectures/layers including -
   * Number of layers
-  * Convolutions vs dropout
+  * Convolutions vs dense layers
   * Dropout
   * Batch normalization
-  * Activation functions
   * Different optimization functions
 * The effects of gaussian noise of classification performance
 * The effects of mislabeled data on the classification performance
